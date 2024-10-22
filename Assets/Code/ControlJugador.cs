@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 
@@ -9,8 +10,10 @@ public class ControlJugador : MonoBehaviour
     private Vector2 movimiento;
     private Rigidbody rb;
     public float velocidadMovimiento = 5f;
-    public float fuerzaSalto = 7f;
+    private float fuerzaSalto = 7f;
     private bool enElSuelo = true;
+    private bool juegoPausado = false;
+    [SerializeField] private GameObject menuPausaUI;
 
     private void Awake()
     {
@@ -25,10 +28,17 @@ public class ControlJugador : MonoBehaviour
         controles.Player.Salto.performed += ctx => Saltar();
 
         // Suscripcion al evento de pausa
-        controles.Player.Salto.performed += ctx => Saltar();
+        controles.Player.Pause.performed += ctx => ControlPausa();
         
         // Referencia al Rigidbody
         rb = GetComponent<Rigidbody>();
+    }
+
+    private void Start()
+    {
+        // Quitamos el menu
+        juegoPausado = false;
+        menuPausaUI.SetActive(false);
     }
 
     private void OnEnable()
@@ -66,5 +76,34 @@ public class ControlJugador : MonoBehaviour
         {
             enElSuelo = true;
         }
+    }
+
+    private void ControlPausa()
+    {
+        // Alterna entre pausar y reanudar el juego
+        if (juegoPausado)
+        {
+            Reanudar();
+        }
+        else
+        {
+            Pausar();
+        }
+    }
+
+    public void Reanudar()
+    {
+        // Ocultamos el menú y reanudamos el juego
+        menuPausaUI.SetActive(false);
+        Time.timeScale = 1f;
+        juegoPausado = false;
+    }
+
+    private void Pausar()
+    {
+        // Mostramos el menú de pausa y detenemos la simulación
+        menuPausaUI.SetActive(true);
+        Time.timeScale = 0f;
+        juegoPausado = true;
     }
 }
